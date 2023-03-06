@@ -3,6 +3,7 @@ package ntpc
 import (
 	"fmt"
 	"net"
+	"strconv"
 	"time"
 )
 
@@ -17,6 +18,7 @@ func NtpQuery(server string, port string) (*time.Time, error) {
 		fmt.Println("Error connecting to NTP server:", err)
 		return nil, err
 	}
+
 	defer conn.Close()
 
 	// send request
@@ -39,7 +41,10 @@ func NtpQuery(server string, port string) (*time.Time, error) {
 		return nil, err
 	}
 
-	fmt.Printf("Response: %v", packet)
+	fmt.Printf("\nResponse: %v", packet)
+	fmt.Printf("\npacket: %v\n %v\n", packet[40:48], packet[40])
+	fmt.Printf("\nuint64: %v\n %s\n", uint64(packet[40]), strconv.FormatUint(uint64(packet[40]), 10))
+
 	// extract and convert timestamp
 	second := uint64(packet[40])<<24 | uint64(packet[41])<<16 | uint64(packet[42])<<8 | uint64(packet[43])
 	fraction := uint64(packet[44])<<24 | uint64(packet[45])<<16 | uint64(packet[46])<<8 | uint64(packet[47])

@@ -1,3 +1,3 @@
-module github.com/haikelfazzani/core/ntpc
+module github.com/haikelfazzani/ntpc
 
 go 1.20
