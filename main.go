@@ -7,6 +7,10 @@ import (
 )
 
 func main() {
-	timeNow, _ := ntpc.NtpQuery("time.google.com", "123")
+	ntpc := &ntpc.NTPC{
+		Server: "pool.ntp.org",
+		Port:   "123",
+	}
+	timeNow, _ := ntpc.Query()
 	fmt.Println("NTP time:", timeNow)
 }

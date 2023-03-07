@@ -3,16 +3,18 @@ package ntpc
 import (
 	"fmt"
 	"net"
-	"strconv"
 	"time"
 )
 
-func NtpQuery(server string, port string) (*time.Time, error) {
+type NTPC struct {
+	Server string
+	Port   string
+}
 
-	addr, _ := net.ResolveUDPAddr("udp", net.JoinHostPort(server, port))
+func (ntpc *NTPC) Query() (*time.Time, error) {
+
+	addr, _ := net.ResolveUDPAddr("udp", net.JoinHostPort(ntpc.Server, ntpc.Port))
 	conn, err := net.Dial("udp", addr.AddrPort().String())
-
-	println(addr.AddrPort().String())
 
 	if err != nil {
 		fmt.Println("Error connecting to NTP server:", err)
@@ -21,29 +23,26 @@ func NtpQuery(server string, port string) (*time.Time, error) {
 
 	defer conn.Close()
 
-	// send request
-	ntpReq := make([]byte, 48)
-	ntpReq[0] = 0x1B
+	ntpPacket := &NtpPacket{
+		LiVnMode: 0x1b, // 0b00011011
+	}
 
-	_, err = conn.Write(ntpReq)
+	bytes, _ := ntpPacket.ToBytes()
+	_, err = conn.Write(bytes)
+
 	if err != nil {
 		fmt.Println("Error sending request:", err)
 		return nil, err
 	}
 
-	conn.SetDeadline(time.Now().Add(5 * time.Second))
+	conn.SetDeadline(time.Now().Add(15 * time.Second))
 
-	// read response
 	packet := make([]byte, 48)
 	_, err = conn.Read(packet)
 	if err != nil {
 		fmt.Println("Error receiving response:", err)
 		return nil, err
 	}
-
-	fmt.Printf("\nResponse: %v", packet)
-	fmt.Printf("\npacket: %v\n %v\n", packet[40:48], packet[40])
-	fmt.Printf("\nuint64: %v\n %s\n", uint64(packet[40]), strconv.FormatUint(uint64(packet[40]), 10))
 
 	// extract and convert timestamp
 	second := uint64(packet[40])<<24 | uint64(packet[41])<<16 | uint64(packet[42])<<8 | uint64(packet[43])
@@ -54,4 +53,8 @@ func NtpQuery(server string, port string) (*time.Time, error) {
 	now := time.Date(1900, 1, 1, 0, 0, 0, 0, time.UTC).Add(time.Duration(nsec))
 
 	return &now, nil
+}
+
+func (ntpc *NTPC) UpdateSystemDate(dateTime string) bool {
+	return true
 }
