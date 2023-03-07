@@ -24,11 +24,11 @@ func (ntpc *NTPC) Query() (*time.Time, error) {
 	defer conn.Close()
 
 	ntpPacket := &NtpPacket{
-		LiVnMode: 0x1b, // 0b00011011
+		LiVnMode: 0x1b, // 0b 00 011 011
 	}
 
-	bytes, _ := ntpPacket.ToBytes()
-	_, err = conn.Write(bytes)
+	request, _ := ntpPacket.ToBytes()
+	_, err = conn.Write(request)
 
 	if err != nil {
 		fmt.Println("Error sending request:", err)
@@ -53,6 +53,10 @@ func (ntpc *NTPC) Query() (*time.Time, error) {
 	now := time.Date(1900, 1, 1, 0, 0, 0, 0, time.UTC).Add(time.Duration(nsec))
 
 	return &now, nil
+}
+
+func (ntpc *NTPC) PacketValidate(packet []byte) bool {
+	return true
 }
 
 func (ntpc *NTPC) UpdateSystemDate(dateTime string) bool {

@@ -9,7 +9,7 @@ type NtpPacket struct {
 	LiVnMode       uint8  // Leap indicator, version number, and mode
 	Stratum        uint8  // Stratum level of the local clock
 	Poll           uint8  // Maximum interval between successive messages
-	Precision      int8   // Precision of the local clock
+	Precision      int8   // Representing the precision of the system clock
 	RootDelay      uint32 // Round trip time to the primary reference source
 	RootDispersion uint32 // Dispersion to the primary reference source
 	ReferenceId    uint32 // Reference identifier
