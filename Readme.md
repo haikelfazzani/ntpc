@@ -1,4 +1,4 @@
-# NTP Client version 4 and SNTP (rfc5905)
+# NTPv4 and SNTP Client (rfc5905)
 
 # Usage
 

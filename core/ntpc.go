@@ -23,6 +23,10 @@ func (ntpc *NTPC) Query() (*time.Time, error) {
 
 	defer conn.Close()
 
+	if err := conn.SetDeadline(time.Now().Add(15 * time.Second)); err != nil {
+		fmt.Printf("failed to set deadline: %v", err)
+	}
+
 	ntpPacket := &NtpPacket{
 		LiVnMode: 0x1b, // 0b 00 011 011
 	}
@@ -34,8 +38,6 @@ func (ntpc *NTPC) Query() (*time.Time, error) {
 		fmt.Println("Error sending request:", err)
 		return nil, err
 	}
-
-	conn.SetDeadline(time.Now().Add(15 * time.Second))
 
 	packet := make([]byte, 48)
 	_, err = conn.Read(packet)
@@ -59,6 +61,6 @@ func (ntpc *NTPC) PacketValidate(packet []byte) bool {
 	return true
 }
 
-func (ntpc *NTPC) UpdateSystemDate(dateTime string) bool {
+func (ntpc *NTPC) UpdateSystem(dateTime string) bool {
 	return true
 }
