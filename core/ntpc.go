@@ -2,7 +2,6 @@ package ntpc
 
 import (
 	"encoding/binary"
-	"fmt"
 	"net"
 	"os/exec"
 	"time"
@@ -41,14 +40,13 @@ func (ntpc *NTPC) Query() (*time.Time, error) {
 
 	response := &NtpPacket{}
 	if err := binary.Read(conn, binary.BigEndian, response); err != nil {
-		fmt.Printf("failed to read server response: %v", err)
 		return nil, err
 	}
 
 	return response.ReceiveTime.UTC(), nil
 }
 
-func (t *ntpTime) UTC() *time.Time {
+func (t *NtpTime) UTC() *time.Time {
 	// On POSIX-compliant OS, time is expressed using the Unix time epoch (or secs since year 1970).
 	// NTP seconds are counted since 1900 and therefore must be corrected with an epoch offset to convert NTP seconds
 	// to Unix time by removing 70 yrs of seconds (1970-1900) or 2208988800 seconds.
