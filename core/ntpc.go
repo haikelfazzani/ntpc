@@ -1,6 +1,8 @@
 package ntpc
 
 import (
+	"encoding/binary"
+	"fmt"
 	"net"
 	"os/exec"
 	"time"
@@ -37,25 +39,26 @@ func (ntpc *NTPC) Query() (*time.Time, error) {
 		return nil, err
 	}
 
-	packet := make([]byte, 48)
-	_, err = conn.Read(packet)
-	if err != nil {
+	response := &NtpPacket{}
+	if err := binary.Read(conn, binary.BigEndian, response); err != nil {
+		fmt.Printf("failed to read server response: %v", err)
 		return nil, err
 	}
 
-	// extract and convert timestamp
-	second := uint64(packet[40])<<24 | uint64(packet[41])<<16 | uint64(packet[42])<<8 | uint64(packet[43])
-	fraction := uint64(packet[44])<<24 | uint64(packet[45])<<16 | uint64(packet[46])<<8 | uint64(packet[47])
-
-	nsec := (second * 1e9) + ((fraction * 1e9) >> 32)
-
-	now := time.Date(1900, 1, 1, 0, 0, 0, 0, time.UTC).Add(time.Duration(nsec))
-
-	return &now, nil
+	return response.ReceiveTime.UTC(), nil
 }
 
-func (ntpc *NTPC) PacketValidate(packet []byte) bool {
-	return true
+func (t *ntpTime) UTC() *time.Time {
+	// On POSIX-compliant OS, time is expressed using the Unix time epoch (or secs since year 1970).
+	// NTP seconds are counted since 1900 and therefore must be corrected with an epoch offset to convert NTP seconds
+	// to Unix time by removing 70 yrs of seconds (1970-1900) or 2208988800 seconds.
+	// secs := float64(t.Seconds) - ntpEpochOffset
+	// nanos := (int64(t.Fraction) * 1e9) >> 32 // convert fractional to nanos
+
+	nsec := uint64(t.Seconds)*1e9 + (uint64(t.Fraction) * 1e9 >> 32)
+	dateTime := time.Date(1900, 1, 1, 0, 0, 0, 0, time.UTC).Add(time.Duration(nsec))
+
+	return &dateTime
 }
 
 func (ntpc *NTPC) UpdateSystem(dateTime string) bool {

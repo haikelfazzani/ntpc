@@ -1,3 +1,5 @@
+NTP packet format v3                  
+
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |LI | VN  |Mode |    Stratum     |     Poll      |  Precision   |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -24,62 +26,55 @@
 
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-.                    Extension Field 1 (variable)               .
+    Flags:
+        LI Leap Indicator (leap): 2-bit integer
+            0     | no warning                           
+            1     | last minute of the day has 61 seconds
+            2     | last minute of the day has 59 seconds
+            3     | unknown (clock unsynchronized) 
 
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        VN Version Number (version): 3-bit integer representing the NTP version number
 
-.                    Extension Field 2 (variable)               .
+        Mode (mode): 3-bit integer representing the mode
+            0     | reserved                 
+            1     | symmetric active         
+            2     | symmetric passive        
+            3     | client                   
+            4     | server                   
+            5     | broadcast                
+            6     | NTP control message      
+            7     | reserved for private use
 
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                          Key Identifier                       |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        Stratum (stratum): 8-bit integer representing the stratum
+            0      | unspecified or invalid                             
+            1      | primary server (e.g., equipped with a GPS receiver)
+            2-15   | secondary server (via NTP)                         
+            16     | unsynchronized                                     
+            17-255 | reserved
 
-|                            dgst (128)                         |
+        Poll: 8-bit signed integer representing the maximum interval between successive messages
 
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        Precision: 8-bit signed integer representing the precision of the system clock
 
-Flags:
-    LI Leap Indicator (leap): 2-bit integer
-        0     | no warning                           
-        1     | last minute of the day has 61 seconds
-        2     | last minute of the day has 59 seconds
-        3     | unknown (clock unsynchronized) 
+    Root Delay (rootdelay): Total round-trip delay to the reference clock
 
-    VN Version Number (version): 3-bit integer representing the NTP version number
+    Root Dispersion (rootdisp): Total dispersion to the reference clock
 
-    Mode (mode): 3-bit integer representing the mode
-        0     | reserved                 
-        1     | symmetric active         
-        2     | symmetric passive        
-        3     | client                   
-        4     | server                   
-        5     | broadcast                
-        6     | NTP control message      
-        7     | reserved for private use
+    Reference ID (refid): 32-bit code identifying the particular server or reference clock
 
-    Stratum (stratum): 8-bit integer representing the stratum
-        0      | unspecified or invalid                             
-        1      | primary server (e.g., equipped with a GPS receiver)
-        2-15   | secondary server (via NTP)                         
-        16     | unsynchronized                                     
-        17-255 | reserved
+    Reference Timestamp: Time when the system clock was last set or corrected
 
-    Poll: 8-bit signed integer representing the maximum interval between successive messages
+    Origin Timestamp (org): Time at the client when the request departed for the server
 
-    Precision: 8-bit signed integer representing the precision of the system clock
+    Receive Timestamp (rec): Time at the server when the request arrived from the client
 
-Root Delay (rootdelay): Total round-trip delay to the reference clock
+    Transmit Timestamp (xmt): Time at the server when the response left for the client (roundtrip)
 
-Root Dispersion (rootdisp): Total dispersion to the reference clock
+    Destination Timestamp (dst): Time at the client when the reply arrived from the server
 
-Reference ID (refid): 32-bit code identifying the particular server or reference clock
 
-Reference Timestamp: Time when the system clock was last set or corrected
-
-Origin Timestamp (org): Time at the client when the request departed for the server
-
-Receive Timestamp (rec): Time at the server when the request arrived from the client
-
-Transmit Timestamp (xmt): Time at the server when the response left for the client (roundtrip)
-
-Destination Timestamp (dst): Time at the client when the reply arrived from the server
+NTP v4 fields:
+        Extension Field 1 (variable)
+        Extension Field 2 (variable)
+        Key Identifier                       
+        dgst (128)
