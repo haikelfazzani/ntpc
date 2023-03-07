@@ -1,8 +1,8 @@
 package ntpc
 
 import (
-	"fmt"
 	"net"
+	"os/exec"
 	"time"
 )
 
@@ -17,14 +17,13 @@ func (ntpc *NTPC) Query() (*time.Time, error) {
 	conn, err := net.Dial("udp", addr.AddrPort().String())
 
 	if err != nil {
-		fmt.Println("Error connecting to NTP server:", err)
 		return nil, err
 	}
 
 	defer conn.Close()
 
 	if err := conn.SetDeadline(time.Now().Add(15 * time.Second)); err != nil {
-		fmt.Printf("failed to set deadline: %v", err)
+		return nil, err
 	}
 
 	ntpPacket := &NtpPacket{
@@ -35,14 +34,12 @@ func (ntpc *NTPC) Query() (*time.Time, error) {
 	_, err = conn.Write(request)
 
 	if err != nil {
-		fmt.Println("Error sending request:", err)
 		return nil, err
 	}
 
 	packet := make([]byte, 48)
 	_, err = conn.Read(packet)
 	if err != nil {
-		fmt.Println("Error receiving response:", err)
 		return nil, err
 	}
 
@@ -62,5 +59,6 @@ func (ntpc *NTPC) PacketValidate(packet []byte) bool {
 }
 
 func (ntpc *NTPC) UpdateSystem(dateTime string) bool {
-	return true
+	_, err := exec.Command("bash", "-c", "timedatectl", "set-time", "'"+dateTime+"'").Output()
+	return err == nil
 }
