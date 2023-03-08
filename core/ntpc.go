@@ -7,12 +7,13 @@ import (
 	"time"
 )
 
-type NTPC struct {
-	Server string
-	Port   string
+type NewClient struct {
+	Server  string
+	Port    string
+	Timeout time.Duration
 }
 
-func (ntpc *NTPC) Query() (*time.Time, error) {
+func (ntpc *NewClient) Query() (*time.Time, error) {
 
 	addr, _ := net.ResolveUDPAddr("udp", net.JoinHostPort(ntpc.Server, ntpc.Port))
 	conn, err := net.Dial("udp", addr.AddrPort().String())
@@ -23,7 +24,7 @@ func (ntpc *NTPC) Query() (*time.Time, error) {
 
 	defer conn.Close()
 
-	if err := conn.SetDeadline(time.Now().Add(15 * time.Second)); err != nil {
+	if err := conn.SetDeadline(time.Now().Add(ntpc.Timeout * time.Second)); err != nil {
 		return nil, err
 	}
 
@@ -59,7 +60,7 @@ func (t *NtpTime) UTC() *time.Time {
 	return &dateTime
 }
 
-func (ntpc *NTPC) UpdateSystem(dateTime string) bool {
+func (ntpc *NewClient) UpdateSystem(dateTime string) bool {
 	_, err := exec.Command("bash", "-c", "timedatectl", "set-time", "'"+dateTime+"'").Output()
 	return err == nil
 }
