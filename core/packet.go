@@ -10,7 +10,7 @@ type NtpTime struct {
 	Fraction uint32
 }
 
-type NtpPacket struct {
+type Packet struct {
 	LiVnMode  uint8 // Leap indicator(2), Version number(3), Mode(3)
 	Stratum   uint8 // Stratum level of the local clock
 	Poll      uint8 // Maximum interval between successive messages
@@ -26,7 +26,7 @@ type NtpPacket struct {
 	TransmitTime  NtpTime // The time at which the reply departed the server for client
 }
 
-func (p *NtpPacket) ToBytes() ([]byte, error) {
+func (p *Packet) ToBytes() ([]byte, error) {
 	buf := new(bytes.Buffer)
 	err := binary.Write(buf, binary.BigEndian, p)
 	return buf.Bytes(), err

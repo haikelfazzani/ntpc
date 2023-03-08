@@ -1,4 +1,11 @@
-# NTP Client
+# NTP
+Simple implementation of NTP client
+
+# Install
+
+```
+go get github.com/haikelfazzani/ntpc
+```
 
 # Usage
 
@@ -15,11 +22,11 @@ func main() {
 	ntpc := &ntpc.NewClient{
 		Server:  "pool.ntp.org",
 		Port:    "123",
-		Timeout: 5,
+		Timeout: 10,
 	}
 
 	timeNow, _ := ntpc.Query()
-	fmt.Println("\n> NTP time:", timeNow.Local()) // 2023-03-07 21:01:53.084929939 +0000 UTC
+	fmt.Println("\n> NTP time:", timeNow.Local())
 
 	dateTime := timeNow.Format("2006-01-02 15:04:05")
 

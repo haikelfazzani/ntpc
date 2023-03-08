@@ -28,7 +28,7 @@ func (ntpc *NewClient) Query() (*time.Time, error) {
 		return nil, err
 	}
 
-	ntpPacket := &NtpPacket{
+	ntpPacket := &Packet{
 		LiVnMode: 0x1b, // 0b 00 011 011
 	}
 
@@ -39,7 +39,7 @@ func (ntpc *NewClient) Query() (*time.Time, error) {
 		return nil, err
 	}
 
-	response := &NtpPacket{}
+	response := &Packet{}
 	if err := binary.Read(conn, binary.BigEndian, response); err != nil {
 		return nil, err
 	}
