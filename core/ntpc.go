@@ -2,8 +2,10 @@ package ntpc
 
 import (
 	"encoding/binary"
+	"fmt"
 	"net"
 	"os/exec"
+	"runtime"
 	"time"
 )
 
@@ -61,6 +63,21 @@ func (t *NtpTime) UTC() *time.Time {
 }
 
 func (ntpc *NewClient) UpdateSystem(dateTime string) bool {
-	_, err := exec.Command("bash", "-c", "timedatectl", "set-time", "'"+dateTime+"'").Output()
-	return err == nil
+
+	var err error
+
+	switch os := runtime.GOOS; os {
+
+	case "linux":
+		_, err = exec.Command("bash", "-c", "date", "-s", "'"+dateTime+"'").Output()
+
+	case "darwin":
+		_, err = exec.Command("bash", "-c", "sudo", "date", "-s", "'"+dateTime+"'").Output()
+	}
+
+	if err != nil {
+		fmt.Printf("ERR: Please start the program as an administrator! %v", err)
+		return false
+	}
+	return true
 }
